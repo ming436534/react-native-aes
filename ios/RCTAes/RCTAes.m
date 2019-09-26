@@ -15,10 +15,11 @@
 RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(encrypt:(NSString *)data key:(NSString *)key iv:(NSString *)iv
+                  useDeprecatedToHex:(BOOL)useDeprecatedHex
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSError *error = nil;
-    NSString *base64 = [AesCrypt encrypt:data key:key iv:iv];
+    NSString *base64 = [AesCrypt encrypt:data key:key iv:iv useDeprecatedHex:useDeprecatedHex];
     if (base64 == nil) {
         reject(@"encrypt_fail", @"Encrypt error", error);
     } else {
@@ -27,10 +28,11 @@ RCT_EXPORT_METHOD(encrypt:(NSString *)data key:(NSString *)key iv:(NSString *)iv
 }
 
 RCT_EXPORT_METHOD(decrypt:(NSString *)base64 key:(NSString *)key iv:(NSString *)iv
+                  useDeprecatedToHex:(BOOL)useDeprecatedHex
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSError *error = nil;
-    NSString *data = [AesCrypt decrypt:base64 key:key iv:iv];
+    NSString *data = [AesCrypt decrypt:base64 key:key iv:iv useDeprecatedHex:useDeprecatedHex];
     if (data == nil) {
         reject(@"decrypt_fail", @"Decrypt failed", error);
     } else {
@@ -40,14 +42,19 @@ RCT_EXPORT_METHOD(decrypt:(NSString *)base64 key:(NSString *)key iv:(NSString *)
 
 RCT_EXPORT_METHOD(pbkdf2:(NSString *)password salt:(NSString *)salt
                   cost:(NSInteger)cost length:(NSInteger)length
+                  useDeprecatedToHex:(BOOL)useDeprecatedToHex
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSError *error = nil;
-    NSString *data = [AesCrypt pbkdf2:password salt:salt cost:cost length:length];
+    NSData *data = [AesCrypt pbkdf2:password salt:salt cost:cost length:length];
     if (data == nil) {
         reject(@"keygen_fail", @"Key generation failed", error);
     } else {
-        resolve(data);
+        if (useDeprecatedToHex) {
+            resolve([AesCrypt toHexDeprecated:data]);
+        } else {
+            resolve([AesCrypt toHex:data]);
+        }
     }
 }
 
@@ -55,11 +62,11 @@ RCT_EXPORT_METHOD(hmac256:(NSString *)base64 key:(NSString *)key
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSError *error = nil;
-    NSString *data = [AesCrypt hmac256:base64 key:key];
+    NSData *data = [AesCrypt hmac256:base64 key:key];
     if (data == nil) {
         reject(@"hmac_fail", @"HMAC error", error);
     } else {
-        resolve(data);
+        resolve([AesCrypt toHex:data]);
     }
 }
 
@@ -67,11 +74,11 @@ RCT_EXPORT_METHOD(sha1:(NSString *)text
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSError *error = nil;
-    NSString *data = [AesCrypt sha1:text];
+    NSData *data = [AesCrypt sha1:text];
     if (data == nil) {
         reject(@"sha1_fail", @"Hash error", error);
     } else {
-        resolve(data);
+        resolve([AesCrypt toHex:data]);
     }
 }
 
@@ -79,11 +86,11 @@ RCT_EXPORT_METHOD(sha256:(NSString *)text
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSError *error = nil;
-    NSString *data = [AesCrypt sha256:text];
+    NSData *data = [AesCrypt sha256:text];
     if (data == nil) {
         reject(@"sha256_fail", @"Hash error", error);
     } else {
-        resolve(data);
+        resolve([AesCrypt toHex:data]);
     }
 }
 
@@ -91,11 +98,11 @@ RCT_EXPORT_METHOD(sha512:(NSString *)text
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSError *error = nil;
-    NSString *data = [AesCrypt sha512:text];
+    NSData *data = [AesCrypt sha512:text];
     if (data == nil) {
         reject(@"sha512_fail", @"Hash error", error);
     } else {
-        resolve(data);
+        resolve([AesCrypt toHex:data]);
     }
 }
 
@@ -111,14 +118,19 @@ RCT_EXPORT_METHOD(randomUuid:(RCTPromiseResolveBlock)resolve
 }
 
 RCT_EXPORT_METHOD(randomKey:(NSInteger)length
+                  useDeprecatedToHex:(BOOL)useDeprecatedToHex
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSError *error = nil;
-    NSString *data = [AesCrypt randomKey:length];
+    NSData *data = [AesCrypt randomKey:length];
     if (data == nil) {
         reject(@"random_fail", @"Random key error", error);
     } else {
-        resolve(data);
+        if (useDeprecatedToHex) {
+            resolve([AesCrypt toHexDeprecated:data]);
+        } else {
+            resolve([AesCrypt toHex:data]);
+        }
     }
 }
 
